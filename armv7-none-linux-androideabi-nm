@@ -1,0 +1,8 @@
+#!/bin/bash
+
+source linux-android-toolchain.config
+
+TARGET=arm-linux-androideabi
+
+exec ${ANDROID_NDK}/toolchains/${TARGET}-4.9/prebuilt/${HOST_ARCH}/bin/${TARGET}-nm \
+     "$@"

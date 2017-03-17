@@ -1,0 +1,14 @@
+#!/bin/bash
+
+source linux-android-toolchain.config
+
+ARCH=arm64
+TARGET=aarch64-linux-android
+
+exec ${ANDROID_NDK}/toolchains/llvm/prebuilt/${HOST_ARCH}/bin/clang \
+     -target ${ARCH}-none-linux-android \
+     --sysroot=${ANDROID_NDK}/platforms/android-${API_VERSION}/arch-${ARCH} \
+     --gcc-toolchain=${ANDROID_NDK}/toolchains/${TARGET}-${GCC_VERSION}/prebuilt/${HOST_ARCH}/bin \
+     -fuse-ld=$(which ${TARGET}-ld) \
+     -isysroot ${ANDROID_NDK}/platforms/android-${API_VERSION}/arch-${ARCH} \
+     "$@"
