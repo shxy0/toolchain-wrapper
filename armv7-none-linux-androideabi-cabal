@@ -1,0 +1,26 @@
+#!/bin/sh
+
+TARGET=armv7-none-linux-androideabi
+
+export COMMON=--builddir=dist/$TARGET
+export COMPILE="--with-ghc=${TARGET}-ghc
+                --with-ghc-pkg=${TARGET}-ghc-pkg
+                --with-gcc=${TARGET}-clang
+                --with-ld=${TARGET}-ld
+                --hsc2hs-options=--cross-compile
+                --hsc2hs-options=--cflag=-m32" # overwrite the stupid -m64 that is hardcoded into hsc2hs.
+# we want to disable library stripping for android; this would call the xcode toolchain strip command,
+# which simply fails.
+export CONFIG="--configure-option=--host=${TARGET} --disable-shared --disable-library-stripping"
+exec "`dirname $0`/common-cross-cabal" "$@"
+
+# Note [hsc2hs]
+#
+# while we do build the hsc2hs tool, we build it for the
+# target. Not the host, where we are going to execute it on...
+#
+# Thus the only hsc2hs tool we have is the one that comes with the
+# host, which will have -m64 on macOS (x64_86). However we want to
+# cross compile to a 32bit device. Luckily the last -mXX value is
+# used, and we can overwrite the -m64 with -m32 via the -cflag
+# in hsc2hs-options.
