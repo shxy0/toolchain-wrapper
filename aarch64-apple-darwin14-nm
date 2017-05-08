@@ -1,6 +1,0 @@
-#!/bin/sh
-
-SDK=iphoneos
-ARCH=aarch64
-
-exec xcrun --sdk ${SDK} nm-classic "$@"

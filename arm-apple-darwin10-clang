@@ -1,6 +1,0 @@
-#!/bin/sh
-
-SDK=iphoneos
-ARCH=armv7
-
-exec xcrun --sdk ${SDK} clang -arch ${ARCH} -miphoneos-version-min=7.0 "$@"

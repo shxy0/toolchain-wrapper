@@ -1,6 +1,0 @@
-#!/bin/sh
-
-SDK=iphonesimulator
-ARCH=i386
-
-exec xcrun --sdk ${SDK} ranlib $@

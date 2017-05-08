@@ -1,6 +1,0 @@
-#!/bin/bash
-
-source linux-android-toolchain.config
-
-exec ${ANDROID_NDK}/toolchains/aarch64-linux-android-${GCC_VERSION}/prebuilt/${HOST_ARCH}/bin/aarch64-linux-android-ranlib \
-     "$@"

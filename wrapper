@@ -1,0 +1,85 @@
+#!/bin/bash
+
+source raspberrypi-toolchain.config
+source android-toolchain.config
+
+name=${0##*/}
+cmd=${name##*-}
+target=${name%-*}
+
+case ${0##*/} in
+	# raspberry pi
+	arm-linux-gnueabihf-clang)
+		flags=" --target=${target}"
+		flags+=" --sysroot=${RPI_SYSROOT}"
+		flags+=" -isysroot ${RPI_SYSROOT}"
+		flags+=" -isystem ${RPI_SYSROOT}/usr/include/${target}/"
+		;;
+	arm-linux-gnueabihf-ld)
+		flags=" --sysroot=${RPI_SYSROOT}"
+		flags+=" -L${RPI_SYSROOT}/lib/${target}"
+		;;
+	# android (armv7)
+	armv7-linux-androideabi-clang)
+		flags=" --target=${target}"
+		flags+=" --sysroot=${ADR32_SYSROOT}"
+		flags+=" -isysroot ${ADR32_SYSROOT}"
+		;;
+	armv7-linux-androideabi-ld)
+		flags=" --sysroot=${ADR32_SYSROOT}"
+		flags+=" -L${ADR32_TOOLCHAIN_LIB}"
+		;;
+	# android (aarch64)
+	aarch64-linux-android-clang)
+		flags=" --target=${target}"
+		flags+=" --sysroot=${ADR64_SYSROOT}"
+		flags+=" -isysroot ${ADR64_SYSROOT}"
+		;;
+	aarch64-linux-android-ld)
+		flags=" --sysroot=${ADR64_SYSROOT}"
+		flags+=" -L${ADR64_TOOLCHAIN_LIB}"
+		;;
+	# iOS -- this us run though apples
+	# xcrun tool.
+	aarch64-apple-darwin14-clang|aarch64-apple-darwin14-ld)
+		flags="--sdk iphoneos ${cmd} -arch arm64"
+		cmd="xcrun"
+		;;
+	aarch64-apple-darwin14-*)
+		flags="--sdk iphoneos ${cmd}"
+		cmd="xrun"
+		;;
+	# iOS (64bit simulator)
+	x86_64-apple-darwin14-clang|x86_64-apple-darwin14-ld)
+		flags="--sdk iphonesimulator ${cmd} -arch x86_64"
+		cmd="xcrun"
+		;;
+	x86_64-apple-darwin14-*)
+		flags="--sdk iphonesimulator ${cmd}"
+		cmd="xcrun"
+		;;
+	# default
+	*-nm)
+		flags=" --target=${target}"
+		;;
+	*-ar|*-ranlib) ;;
+	*-cabal)
+		fcommon="--builddir=dist/${taget}"
+		fcompile=" --with-ghc=${target}-ghc"
+		fcompile+=" --with-ghc-pkg=${target}-ghc-pkg"
+		fcompile+=" --with-gcc=${target}-clang"
+		fcompile+=" --with-ld=${target}-ld"
+		fcompile+=" --hsc2hs-options=--cross-compile"
+		fconfig="--configure-option=--host=${target}"
+		case $1 in
+			configure|install) flags="${fcommon} ${fcompile} ${fconfig}" ;;
+			build)             flags="${fcommon} ${fcompile}" ;;
+			list|info|update)  flags="" ;;
+			"")                flags="" ;;
+			*)                 flags=$fcommon ;;
+		esac
+		;;
+	*) echo "Unknown command: ${0##*/}" >&2; exit 1;;
+esac
+
+exec $cmd $flags "$@"

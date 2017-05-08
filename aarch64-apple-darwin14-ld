@@ -1,6 +1,0 @@
-#!/bin/sh
-
-SDK=iphoneos
-ARCH=arm64
-
-exec xcrun --sdk ${SDK} ld -arch ${ARCH} "$@"
