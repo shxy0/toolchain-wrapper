@@ -8,6 +8,22 @@ cmd=${name##*-}
 target=${name%-*}
 
 case ${0##*/} in
+	*-cabal)
+		fcommon="--builddir=dist/${taget}"
+		fcompile=" --with-ghc=${target}-ghc"
+		fcompile+=" --with-ghc-pkg=${target}-ghc-pkg"
+		fcompile+=" --with-gcc=${target}-clang"
+		fcompile+=" --with-ld=${target}-ld"
+		fcompile+=" --hsc2hs-options=--cross-compile"
+		fconfig="--configure-option=--host=${target}"
+		case $1 in
+			configure|install) flags="${fcommon} ${fcompile} ${fconfig}" ;;
+			build)             flags="${fcommon} ${fcompile}" ;;
+			list|info|update)  flags="" ;;
+			"")                flags="" ;;
+			*)                 flags=$fcommon ;;
+		esac
+		;;
 	# raspberry pi
 	arm-linux-gnueabihf-clang)
 		flags=" --target=${target}"
@@ -63,22 +79,6 @@ case ${0##*/} in
 		flags=" --target=${target}"
 		;;
 	*-ar|*-ranlib) ;;
-	*-cabal)
-		fcommon="--builddir=dist/${taget}"
-		fcompile=" --with-ghc=${target}-ghc"
-		fcompile+=" --with-ghc-pkg=${target}-ghc-pkg"
-		fcompile+=" --with-gcc=${target}-clang"
-		fcompile+=" --with-ld=${target}-ld"
-		fcompile+=" --hsc2hs-options=--cross-compile"
-		fconfig="--configure-option=--host=${target}"
-		case $1 in
-			configure|install) flags="${fcommon} ${fcompile} ${fconfig}" ;;
-			build)             flags="${fcommon} ${fcompile}" ;;
-			list|info|update)  flags="" ;;
-			"")                flags="" ;;
-			*)                 flags=$fcommon ;;
-		esac
-		;;
 	*) echo "Unknown command: ${0##*/}" >&2; exit 1;;
 esac
 
