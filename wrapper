@@ -7,7 +7,7 @@ name=${0##*/}
 cmd=${name##*-}
 target=${name%-*}
 
-case ${0##*/} in
+case $name in
 	*-cabal)
 		fcommon="--builddir=dist/${taget}"
 		fcompile=" --with-ghc=${target}-ghc"
@@ -45,6 +45,9 @@ case ${0##*/} in
 		flags=" --sysroot=${ADR32_SYSROOT}"
 		flags+=" -L${ADR32_TOOLCHAIN_LIB}"
 		;;
+	armv7-linux-androideabi-nm)
+		# no --target flag 
+		;;
 	# android (aarch64)
 	aarch64-linux-android-clang)
 		flags=" --target=${target}"
@@ -55,6 +58,8 @@ case ${0##*/} in
 		flags=" --sysroot=${ADR64_SYSROOT}"
 		flags+=" -L${ADR64_TOOLCHAIN_LIB}"
 		;;
+	aarch64-linux-android-nm)
+		;;
 	# iOS -- this us run though apples
 	# xcrun tool.
 	aarch64-apple-darwin14-clang|aarch64-apple-darwin14-ld)
@@ -63,7 +68,7 @@ case ${0##*/} in
 		;;
 	aarch64-apple-darwin14-*)
 		flags="--sdk iphoneos ${cmd}"
-		cmd="xrun"
+		cmd="xcrun"
 		;;
 	# iOS (64bit simulator)
 	x86_64-apple-darwin14-clang|x86_64-apple-darwin14-ld)
@@ -82,4 +87,10 @@ case ${0##*/} in
 	*) echo "Unknown command: ${0##*/}" >&2; exit 1;;
 esac
 
-exec $cmd $flags "$@"
+case $target in
+	*-linux-gnueabihf)      exec env PATH="${RPI_PATH}:${PATH}" $cmd $flags "$@" ;;
+	armv7-linux-android*)   exec env PATH="${ADR32_PATH}:${PATH}" $cmd $flags "$@" ;;
+	aarch64-linux-android*) exec env PATH="${ADR64_PATH}:${PATH}" $cmd $flags "$@" ;;
+	*) exec $cmd $flags "$@" ;;
+esac
+
