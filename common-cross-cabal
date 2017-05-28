@@ -1,9 +1,0 @@
-# Some extra options, depending on what command was invoked.
-case $1 in
-    configure|install) OPTIONS="$COMMON $COMPILE $CONFIG" ;;
-    build)             OPTIONS="$COMMON $COMPILE" ;;
-    list|info|update)  OPTIONS="" ;;
-    "")                OPTIONS="" ;;
-    *)                 OPTIONS="$COMMON" ;;
-esac
-exec cabal $OPTIONS "$@"
