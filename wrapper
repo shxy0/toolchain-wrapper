@@ -9,13 +9,13 @@ target=${name%-*}
 
 case $name in
 	*-cabal)
-		fcommon="--builddir=dist/${taget}"
+		fcommon="--builddir=dist/${target}"
 		fcompile=" --with-ghc=${target}-ghc"
 		fcompile+=" --with-ghc-pkg=${target}-ghc-pkg"
 		fcompile+=" --with-gcc=${target}-clang"
 		fcompile+=" --with-ld=${target}-ld"
 		fcompile+=" --hsc2hs-options=--cross-compile"
-		fconfig="--configure-option=--host=${target}"
+		fconfig="--disable-shared --configure-option=--host=${target}"
 		case $1 in
 			configure|install) flags="${fcommon} ${fcompile} ${fconfig}" ;;
 			build)             flags="${fcommon} ${fcompile}" ;;
@@ -31,7 +31,7 @@ case $name in
 		flags+=" -isysroot ${RPI_SYSROOT}"
 		flags+=" -isystem ${RPI_SYSROOT}/usr/include/${target}/"
 		;;
-	arm-linux-gnueabihf-ld)
+	arm-linux-gnueabihf-ld|arm-linux-gnueabihf-ld.gold)
 		flags=" --sysroot=${RPI_SYSROOT}"
 		flags+=" -L${RPI_SYSROOT}/lib/${target}"
 		;;
@@ -41,12 +41,9 @@ case $name in
 		flags+=" --sysroot=${ADR32_SYSROOT}"
 		flags+=" -isysroot ${ADR32_SYSROOT}"
 		;;
-	armv7-linux-androideabi-ld)
+	armv7-linux-androideabi-ld|armv7-linux-androideabi-ld.gold)
 		flags=" --sysroot=${ADR32_SYSROOT}"
 		flags+=" -L${ADR32_TOOLCHAIN_LIB}"
-		;;
-	armv7-linux-androideabi-nm)
-		# no --target flag 
 		;;
 	# android (aarch64)
 	aarch64-linux-android-clang)
@@ -54,36 +51,31 @@ case $name in
 		flags+=" --sysroot=${ADR64_SYSROOT}"
 		flags+=" -isysroot ${ADR64_SYSROOT}"
 		;;
-	aarch64-linux-android-ld)
+	aarch64-linux-android-ld|aarch64-linux-android-ld.gold)
 		flags=" --sysroot=${ADR64_SYSROOT}"
 		flags+=" -L${ADR64_TOOLCHAIN_LIB}"
 		;;
-	aarch64-linux-android-nm)
-		;;
 	# iOS -- this us run though apples
 	# xcrun tool.
-	aarch64-apple-darwin14-clang|aarch64-apple-darwin14-ld)
+	aarch64-apple-ios-clang|aarch64-apple-ios-ld)
 		flags="--sdk iphoneos ${cmd} -arch arm64"
 		cmd="xcrun"
 		;;
-	aarch64-apple-darwin14-*)
+	aarch64-apple-ios-*|aarch64-apple-ios-*)
 		flags="--sdk iphoneos ${cmd}"
 		cmd="xcrun"
 		;;
 	# iOS (64bit simulator)
-	x86_64-apple-darwin14-clang|x86_64-apple-darwin14-ld)
+	x86_64-apple-ios-clang|x86_64-apple-ios-ld)
 		flags="--sdk iphonesimulator ${cmd} -arch x86_64"
 		cmd="xcrun"
 		;;
-	x86_64-apple-darwin14-*)
+	x86_64-apple-ios-*)
 		flags="--sdk iphonesimulator ${cmd}"
 		cmd="xcrun"
 		;;
 	# default
-	*-nm)
-		flags=" --target=${target}"
-		;;
-	*-ar|*-ranlib) ;;
+	*-nm|*-ar|*-ranlib) ;;
 	*) echo "Unknown command: ${0##*/}" >&2; exit 1;;
 esac
 
