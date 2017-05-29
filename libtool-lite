@@ -26,9 +26,10 @@ verbose=0
 
 # find_lib <name> path path path path
 function find_lib () {
+	$lib=$1; shift 1;
 	for dir in $@; do
-		if [ -f "$dir/$1" ]; then
-			echo "$dir/$1"
+		if [ -f "$dir/$lib" ]; then
+			echo "$dir/$lib"
 			break
 		fi
 	done

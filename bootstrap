@@ -1,7 +1,7 @@
 #!/bin/bash
 
 targets="arm-linux-gnueabihf armv7-linux-androideabi aarch64-linux-android x86_64-apple-ios aarch64-apple-ios"
-commands="gcc clang ld ld.gold nm ar ranlib cabal"
+commands="clang ld ld.gold nm ar ranlib cabal"
 
 for target in $targets; do
 	for command in $commands; do
