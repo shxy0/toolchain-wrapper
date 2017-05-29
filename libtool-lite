@@ -48,8 +48,8 @@ while [ "$#" -gt 0 ]; do
 	esac
 done
 
-if [ $mode -neq $STATIC ]; then
-	echo "-dynamic not supported!" >&2; exit 1;;
+if [ ! $mode == $STATIC ]; then
+	echo "-dynamic not supported!" >&2; exit 1;
 fi
 
 MRI="create ${output}\n"
