@@ -7,4 +7,10 @@ for target in $targets; do
 	for command in $commands; do
 		ln -s wrapper $target-$command
 	done
+
+	# create libtool wrapper for non apple platforms
+	case "$target" in
+		*-apple-*) continue;;
+		*) ln -s libtool-lite $target-libtool;;
+	esac
 done
