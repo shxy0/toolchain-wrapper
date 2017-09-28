@@ -19,11 +19,17 @@ case $name in
 		case $1 in
 			configure|install) flags="${fcommon} ${fcompile} ${fconfig}" ;;
 			build)             flags="${fcommon} ${fcompile}" ;;
+            new-configure|new-install)
+                               flags="${fcompile} ${fconfig}" ;;
+            new-build)         flags="${fcompile}" ;;
 			list|info|update)  flags="" ;;
 			"")                flags="" ;;
 			*)                 flags=$fcommon ;;
 		esac
 		;;
+  *-hsc2hs)
+    flags=" --cross-compile"
+    ;;
 	# raspberry pi
 	arm-linux-gnueabihf-clang)
 		flags=" --target=${target}"
@@ -78,6 +84,8 @@ case $name in
 	*-nm|*-ar|*-ranlib) ;;
 	*) echo "Unknown command: ${0##*/}" >&2; exit 1;;
 esac
+
+# echo "$cmd $flags $@"
 
 case $target in
 	*-linux-gnueabihf)      exec env PATH="${RPI_PATH}:${PATH}" $cmd $flags "$@" ;;
