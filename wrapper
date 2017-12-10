@@ -14,6 +14,7 @@ case $name in
 		fcompile+=" --with-ghc-pkg=${target}-ghc-pkg"
 		fcompile+=" --with-gcc=${target}-clang"
 		fcompile+=" --with-ld=${target}-ld"
+    fcompile+=" --with-hsc2hs=${target}-hsc2hs"
 		fcompile+=" --hsc2hs-options=--cross-compile"
 		fconfig="--disable-shared --configure-option=--host=${target}"
 		case $1 in
@@ -40,6 +41,7 @@ case $name in
 	arm-linux-gnueabihf-ld|arm-linux-gnueabihf-ld.gold)
 		flags=" --sysroot=${RPI_SYSROOT}"
 		flags+=" -L${RPI_SYSROOT}/lib/${target}"
+    flags+=" -L${RPI_TOOLCHAIN_LIB}"
 		;;
 	# android (armv7)
 	armv7-linux-androideabi-clang)
@@ -60,6 +62,16 @@ case $name in
 	aarch64-linux-android-ld|aarch64-linux-android-ld.gold)
 		flags=" --sysroot=${ADR64_SYSROOT}"
 		flags+=" -L${ADR64_TOOLCHAIN_LIB}"
+		;;
+	# android (x86_64)
+	x86_64-linux-android-clang)
+		flags=" --target=${target}"
+		flags+=" --sysroot=${ADRx86_64_SYSROOT}"
+		flags+=" -isysroot ${ADRx86_64_SYSROOT}"
+		;;
+	x86_64-linux-android-ld|x86_64-linux-android-ld.gold)
+		flags=" --sysroot=${ADRx86_64_SYSROOT}"
+		flags+=" -L${ADRx86_64_TOOLCHAIN_LIB}"
 		;;
 	# iOS -- this us run though apples
 	# xcrun tool.
@@ -85,12 +97,13 @@ case $name in
 	*) echo "Unknown command: ${0##*/}" >&2; exit 1;;
 esac
 
-# echo "$cmd $flags $@"
+#(>&2 echo "$cmd $flags $@")
 
 case $target in
 	*-linux-gnueabihf)      exec env PATH="${RPI_PATH}:${PATH}" $cmd $flags "$@" ;;
 	armv7-linux-android*)   exec env PATH="${ADR32_PATH}:${PATH}" $cmd $flags "$@" ;;
 	aarch64-linux-android*) exec env PATH="${ADR64_PATH}:${PATH}" $cmd $flags "$@" ;;
+	x86_64-linux-android*)  exec env PATH="${ADRx86_64_PATH}:${PATH}" $cmd $flags "$@" ;;
 	*) exec $cmd $flags "$@" ;;
 esac
 
