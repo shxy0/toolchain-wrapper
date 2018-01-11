@@ -7,6 +7,21 @@ name=${0##*/}
 cmd=${name##*-}
 target=${name%-*}
 
+die () {
+    echo "ERROR: $1" >& 2
+    exit 1
+}
+
+check_android_toolchain() {
+    if [ -z "${ANDROID_SYSROOT}" -o ! -d "$ANDROID_SYSROOT" ]; then
+        die "ANDROID_SYSROOT ($ANDROID_SYSROOT) empty or not a directory"
+    fi
+}
+
+case $name in
+    *-android-*) check_android_toolchain ;;
+esac
+
 case $name in
 	*-cabal)
 		fcommon="--builddir=dist/${target}"
@@ -45,34 +60,25 @@ case $name in
 		;;
 	# android (armv7)
 	armv7-linux-androideabi-clang)
-		flags=" --target=${target}"
-		flags+=" --sysroot=${ADR32_SYSROOT}"
-		flags+=" -isysroot ${ADR32_SYSROOT}"
+    flags=${ANDROID_ARM_CFLAGS}
 		;;
 	armv7-linux-androideabi-ld|armv7-linux-androideabi-ld.gold)
-		flags=" --sysroot=${ADR32_SYSROOT}"
-		flags+=" -L${ADR32_TOOLCHAIN_LIB}"
+    flags=${ANDROID_ARM_LDFLAGS}
 		;;
 	# android (aarch64)
 	aarch64-linux-android-clang)
-		flags=" --target=${target}"
-		flags+=" --sysroot=${ADR64_SYSROOT}"
-		flags+=" -isysroot ${ADR64_SYSROOT}"
+    flags=${ANDROID_ARM64_CFLAGS}
 		;;
 	aarch64-linux-android-ld|aarch64-linux-android-ld.gold)
-		flags=" --sysroot=${ADR64_SYSROOT}"
-		flags+=" -L${ADR64_TOOLCHAIN_LIB}"
+    flags=${ANDROID_ARM64_LDFLAGS}
 		;;
 	# android (x86_64)
 	x86_64-linux-android-clang)
-		flags=" --target=${target}"
-		flags+=" --sysroot=${ADRx86_64_SYSROOT}"
-		flags+=" -isysroot ${ADRx86_64_SYSROOT}"
+    flags=${ANDROID_X86_64_CFLAGS}
 		;;
 	x86_64-linux-android-ld|x86_64-linux-android-ld.gold)
-		flags=" --sysroot=${ADRx86_64_SYSROOT}"
-		flags+=" -L${ADRx86_64_TOOLCHAIN_LIB}"
-		;;
+    flags=${ANDROID_X86_64_LDFLAGS}
+    ;;
 	# iOS -- this us run though apples
 	# xcrun tool.
 	aarch64-apple-ios-clang|aarch64-apple-ios-ld)
@@ -97,13 +103,13 @@ case $name in
 	*) echo "Unknown command: ${0##*/}" >&2; exit 1;;
 esac
 
-#(>&2 echo "$cmd $flags $@")
+(>&2 echo "$cmd $flags $@")
 
 case $target in
 	*-linux-gnueabihf)      exec env PATH="${RPI_PATH}:${PATH}" $cmd $flags "$@" ;;
-	armv7-linux-android*)   exec env PATH="${ADR32_PATH}:${PATH}" $cmd $flags "$@" ;;
-	aarch64-linux-android*) exec env PATH="${ADR64_PATH}:${PATH}" $cmd $flags "$@" ;;
-	x86_64-linux-android*)  exec env PATH="${ADRx86_64_PATH}:${PATH}" $cmd $flags "$@" ;;
+	armv7-linux-android*)   exec env PATH="${ANDROID_ARM_PATH}:${PATH}" $cmd $flags "$@" ;;
+	aarch64-linux-android*) exec env PATH="${ANDROID_ARM64_PATH}:${PATH}" $cmd $flags "$@" ;;
+	x86_64-linux-android*)  exec env PATH="${ANDROID_X86_64_PATH}:${PATH}" $cmd $flags "$@" ;;
 	*) exec $cmd $flags "$@" ;;
 esac
 
