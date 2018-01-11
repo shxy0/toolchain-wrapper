@@ -103,7 +103,7 @@ case $name in
 	*) echo "Unknown command: ${0##*/}" >&2; exit 1;;
 esac
 
-(>&2 echo "$cmd $flags $@")
+#(>&2 echo "$cmd $flags $@")
 
 case $target in
 	*-linux-gnueabihf)      exec env PATH="${RPI_PATH}:${PATH}" $cmd $flags "$@" ;;
