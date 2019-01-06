@@ -3,3 +3,4 @@ clang-xcode5-wrapper
 *.hi
 /*-apple-*
 /*-linux-*
+/*-wasm-*
