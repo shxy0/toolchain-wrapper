@@ -63,6 +63,12 @@ case $name in
 	    flags=" --target=wasm32-unknown-unknown-wasm"
 	    flags+=" --sysroot=${WASM_SYSROOT}"
 	    flags+=" -fdebug-prefix-map=${WASM_BASE}=wasmception://v0.1"
+	    # wasm-ld will dead-lock randomly if threads is on, which is
+	    # the default.
+	    flags+=" -Wl,--no-threads"
+	    # silence clang complaining about -Wl,--no-threads when no
+	    # linking is involved.  This is a bit of a catch-all though :(
+	    flags+=" -Wno-unused-command-line-argument"
 	    ;;
 	wasm32-unknown-unknown-wasm-ld|wasm32-unknown-unknown-wasm-ld.gold)
 	    flags=" --sysroot=${WASM_SYSROOT}"
