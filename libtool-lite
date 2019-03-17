@@ -3,9 +3,9 @@
 # This script pretends to be libtool.  And supports
 # only a limited set of flags.
 #
-# It is supposed to be a stand in for libtool -static, whic
+# It is supposed to be a stand in for libtool -static, which
 # creates a static archive.  This is done by locating all -l<lib>
-# libs in the provied -L<lib path> library paths, and building an
+# libs in the provided -L<lib path> library paths, and building an
 # MRI script to create the final archive from all the libraries, and
 # other provided inputs.
 #
@@ -17,17 +17,24 @@ set -e
 
 ldflags_L=()
 ldflags_l=()
+
 output=""
 inputs=()
+
 STATIC=0
 DYNAMIC=1
 mode=$DYNAMIC
+
 verbose=0
 
 # find_lib <name> path path path path
-function find_lib () {
-	lib=$1; shift 1;
-	for dir in $@; do
+function find_lib () 
+{
+	lib=$1; 
+	shift 1;
+	
+	for dir in $@; 
+	do
 		if [ -f "$dir/$lib" ]; then
 			echo "$dir/$lib"
 			break
@@ -35,14 +42,28 @@ function find_lib () {
 	done
 } 
 
-while [ "$#" -gt 0 ]; do
+while [ "$#" -gt 0 ]; 
+do
 	case "$1" in
-		-v|--verbose) verbose=1; shift 1;;
-		-o) output="$2"; shift 2;;
-		-L*) ldflags_L+=("${1:2:${#1}-2}"); shift 1;;
-		-l*) ldflags_l+=("lib${1:2:${#1}-2}.a"); shift 1;;
-		-static) mode=$STATIC; shift 1;;
+		-v|--verbose) 
+			verbose=1; 
+			shift 1
+			;;
+		-o) 
+			output="$2"; 
+			shift 2
+			;;
+		-L*) 
+			ldflags_L+=("${1:2:${#1}-2}"); 
+			shift 1
+			;;
+		-l*) 
+			ldflags_l+=("lib${1:2:${#1}-2}.a"); 
+			shift 1
+			;;
+		-static)  mode=$STATIC;  shift 1;;
 		-dynamic) mode=$DYNAMIC; shift 1;;
+		
 		-Wl,*) ldflags+=("${1#*,}"); shift 1;;
 		-*) echo "unknown option: $1" >&2; exit 1;;
 		*) inputs+=("$1"); shift 1;;
@@ -54,7 +75,9 @@ if [ ! $mode == $STATIC ]; then
 fi
 
 MRI="create ${output}\n"
-for input in "${ldflags_l[@]}"; do
+
+for input in "${ldflags_l[@]}"; 
+do
 	lib=$(find_lib $input ${ldflags_L[@]})
 	if [ -z $lib ]; then
 		echo "Failed to find lib $input" >&2
@@ -64,9 +87,13 @@ for input in "${ldflags_l[@]}"; do
 		continue
 	fi
 done
-for input in "${inputs[@]}"; do
+
+for input in "${inputs[@]}"; 
+do
 	MRI+="addmod $input\n"
 done
+
 MRI+="save\nend\n"
+
 echo -e "$MRI" | $target-ar -M
 $target-ranlib $output

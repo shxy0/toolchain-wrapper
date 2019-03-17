@@ -8,31 +8,37 @@ name=${0##*/}
 cmd=${name##*-}
 target=${name%-*}
 
-die () {
+die () 
+{
     echo "ERROR: $1" >& 2
     exit 1
 }
 
-check_android_toolchain() {
+check_android_toolchain() 
+{
     if [ -z "${ANDROID_SYSROOT}" -o ! -d "$ANDROID_SYSROOT" ]; then
         die "ANDROID_SYSROOT ($ANDROID_SYSROOT) empty or not a directory"
     fi
 }
 
 case $name in
-    *-android-*) check_android_toolchain ;;
+    *-android-*) 
+		check_android_toolchain ;;
 esac
 
 case $name in
 	*-cabal)
 		fcommon="--builddir=dist/${target}"
-		fcompile=" --with-ghc=${target}-ghc"
+		
+		fcompile =" --with-ghc=${target}-ghc"
 		fcompile+=" --with-ghc-pkg=${target}-ghc-pkg"
 		fcompile+=" --with-gcc=${target}-clang"
 		fcompile+=" --with-ld=${target}-ld"
-    fcompile+=" --with-hsc2hs=${target}-hsc2hs"
+		fcompile+=" --with-hsc2hs=${target}-hsc2hs"
 		fcompile+=" --hsc2hs-options=--cross-compile"
+		
 		fconfig="--disable-shared --configure-option=--host=${target}"
+		
 		case $1 in
 			configure|install) flags="${fcommon} ${fcompile} ${fconfig}" ;;
 			build)             flags="${fcommon} ${fcompile}" ;;
@@ -44,9 +50,11 @@ case $name in
 			*)                 flags=$fcommon ;;
 		esac
 		;;
-  *-hsc2hs)
-    flags=" --cross-compile"
-    ;;
+		
+	*-hsc2hs)
+		flags=" --cross-compile"
+		;;
+		
 	# raspberry pi
 	arm-linux-gnueabihf-clang)
 		flags=" --target=${target}"
@@ -59,6 +67,7 @@ case $name in
 		flags+=" -L${RPI_SYSROOT}/lib/${target}"
 		flags+=" -L${RPI_TOOLCHAIN_LIB}"
 		;;
+		  
 	wasm32-unknown-unknown-wasm-clang)
 	    flags=" --target=wasm32-unknown-unknown-wasm"
 	    flags+=" --sysroot=${WASM_SYSROOT}"
@@ -74,37 +83,42 @@ case $name in
 	    flags=" --sysroot=${WASM_SYSROOT}"
 	    flags+=" -fdebug-prefix-map=${WASM_BASE}=wasmception://v0.1"
 	    ;;
+		
 	# android (armv7)
 	armv7-linux-androideabi-clang)
-    flags=${ANDROID_ARM_CFLAGS}
+		flags=${ANDROID_ARM_CFLAGS}
 		;;
 	armv7-linux-androideabi-ld|armv7-linux-androideabi-ld.gold)
-    flags=${ANDROID_ARM_LDFLAGS}
+		flags=${ANDROID_ARM_LDFLAGS}
 		;;
+		
 	# android (aarch64)
 	aarch64-linux-android-clang)
-    flags=${ANDROID_ARM64_CFLAGS}
+		flags=${ANDROID_ARM64_CFLAGS}
 		;;
 	aarch64-linux-android-ld|aarch64-linux-android-ld.gold)
-    flags=${ANDROID_ARM64_LDFLAGS}
+		flags=${ANDROID_ARM64_LDFLAGS}
 		;;
+		
 	# android (x86_64)
 	x86_64-linux-android-clang)
-    flags=${ANDROID_X86_64_CFLAGS}
+		flags=${ANDROID_X86_64_CFLAGS}
 		;;
 	x86_64-linux-android-ld|x86_64-linux-android-ld.gold)
-    flags=${ANDROID_X86_64_LDFLAGS}
-    ;;
+		flags=${ANDROID_X86_64_LDFLAGS}
+		;;
+		
 	# iOS -- this us run though apples
 	# xcrun tool.
 	aarch64-apple-ios-clang|aarch64-apple-ios-ld)
 		flags="--sdk iphoneos ${cmd} -arch arm64"
 		cmd="xcrun"
 		;;
-	aarch64-apple-ios-*|aarch64-apple-ios-*)
+	aarch64-apple-ios-*)
 		flags="--sdk iphoneos ${cmd}"
 		cmd="xcrun"
 		;;
+		
 	# iOS (64bit simulator)
 	x86_64-apple-ios-clang|x86_64-apple-ios-ld)
 		flags="--sdk iphonesimulator ${cmd} -arch x86_64"
@@ -114,6 +128,7 @@ case $name in
 		flags="--sdk iphonesimulator ${cmd}"
 		cmd="xcrun"
 		;;
+		
 	# default
 	*-llvm-*|wasm32-*-nm|wasm32-*-ar|wasm32-*-ranlib)
 	    # if there is -llvm- in the name, we need to retain it
@@ -127,10 +142,20 @@ esac
 (>&2 echo "WRAPPED: $cmd $flags $@")
 
 case $target in
-	*-linux-gnueabihf)      exec env PATH="${RPI_PATH}:${PATH}" $cmd $flags "$@" ;;
-	armv7-linux-android*)   exec env PATH="${ANDROID_ARM_PATH}:${PATH}" $cmd $flags "$@" ;;
-	aarch64-linux-android*) exec env PATH="${ANDROID_ARM64_PATH}:${PATH}" $cmd $flags "$@" ;;
-	x86_64-linux-android*)  exec env PATH="${ANDROID_X86_64_PATH}:${PATH}" $cmd $flags "$@" ;;
-	wasm32-*)               exec env PATH="${WASM_PATH}:${PATH}" $cmd $flags "$@" ;;
+	*-linux-gnueabihf)      
+		exec env PATH="${RPI_PATH}:${PATH}"             $cmd $flags "$@" 
+		;;
+	armv7-linux-android*)   
+		exec env PATH="${ANDROID_ARM_PATH}:${PATH}"     $cmd $flags "$@" 
+		;;
+	aarch64-linux-android*) 
+		exec env PATH="${ANDROID_ARM64_PATH}:${PATH}"   $cmd $flags "$@" 
+		;;
+	x86_64-linux-android*)  
+		exec env PATH="${ANDROID_X86_64_PATH}:${PATH}"  $cmd $flags "$@" 
+		;;
+	wasm32-*)               
+		exec env PATH="${WASM_PATH}:${PATH}"            $cmd $flags "$@" 
+		;;
 	*) exec $cmd $flags "$@" ;;
 esac
